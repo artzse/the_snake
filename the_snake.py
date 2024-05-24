@@ -114,7 +114,6 @@ class Snake(GameObject):
         if self.last:
             pg.draw.rect(screen, BOARD_BACKGROUND_COLOR,
                          self.create_rect(self.last))
-            self.last = None
 
     def reset(self):
         """Сброс игры до стартовых значений."""
@@ -161,6 +160,7 @@ def main():
             if apple.position == next_head_position:
                 snake.length += 1
                 apple.randomize_position(snake.positions)
+                snake.last = None
             else:
                 snake.last = snake.positions[-1]
                 snake.positions.pop()
