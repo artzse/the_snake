@@ -40,8 +40,8 @@ clock = pg.time.Clock()
 class GameObject():
     """Базовый класс, необходимый для описания других объектов."""
 
-    def __init__(self, position=CENTRAL, color=BOARD_BACKGROUND_COLOR):
-        self.position = position
+    def __init__(self, color=BOARD_BACKGROUND_COLOR):
+        self.position = CENTRAL
         self.body_color = color
 
     def create_rect(self, position: tuple = CENTRAL):
