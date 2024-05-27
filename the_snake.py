@@ -46,11 +46,14 @@ class GameObject():
 
     def create_rect(self, position: tuple = CENTRAL):
         """Создание прямоугольника для дальнейшей отрисовки."""
-        return (pg.Rect(position, (GRID_SIZE, GRID_SIZE)))
+        return pg.Rect(position,
+                       (GRID_SIZE,
+                        GRID_SIZE))
 
     def draw(self):
         """Метод для будущих классов"""
-        raise NotImplementedError
+        raise NotImplementedError(
+            f'Метод класса {type(self).__name__} не определён.')
 
 
 class Apple(GameObject):
@@ -62,10 +65,11 @@ class Apple(GameObject):
 
     def randomize_position(self, snake_positions):
         """Генерация случайной позиции."""
-        self.position = (randint(0, GRID_WIDTH - 1) * GRID_SIZE,
-                         randint(0, GRID_HEIGHT - 1) * GRID_SIZE)
-        if self.position in snake_positions:
-            self.randomize_position(snake_positions)
+        while True:
+            self.position = (randint(0, GRID_WIDTH - 1) * GRID_SIZE,
+                             randint(0, GRID_HEIGHT - 1) * GRID_SIZE)
+            if self.position not in snake_positions:
+                break
 
     def draw(self):
         """Функция отрисовки."""
@@ -88,17 +92,15 @@ class Snake(GameObject):
 
     def move(self):
         """Функция определящяющая следующую ячейку движения змеи."""
+        self.positions = self.positions[:self.length]
+        self.last = self.positions[-1]
+
+        dir_x, dir_y = self.direction
         head_x, head_y = self.get_head_position()
-        head_x += self.direction[0] * GRID_SIZE
-        head_y += self.direction[1] * GRID_SIZE
 
-        if head_x // SCREEN_WIDTH != 0:
-            head_x = 0 if head_x >= SCREEN_WIDTH else SCREEN_WIDTH
-
-        if head_y // SCREEN_HEIGHT != 0:
-            head_y = 0 if head_y >= SCREEN_HEIGHT else SCREEN_HEIGHT
-
-        return (head_x, head_y)
+        self.positions.insert(0,
+                              ((head_x + dir_x * GRID_SIZE) % SCREEN_WIDTH,
+                               (head_y + dir_y * GRID_SIZE) % SCREEN_HEIGHT))
 
     def get_head_position(self):
         """Получение позиции головы змеи."""
@@ -117,9 +119,8 @@ class Snake(GameObject):
 
     def reset(self):
         """Сброс игры до стартовых значений."""
-        screen.fill(BOARD_BACKGROUND_COLOR)
         self.length = 1
-        self.positions = [self.position, ]
+        self.positions = [CENTRAL, ]
         self.last = None
         self.direction = RIGHT
         self.next_direction = None
@@ -150,20 +151,18 @@ def main():
         clock.tick(SPEED)
         if not handle_keys(snake):
             break
-        snake.update_direction()
 
-        next_head_position = snake.move()
-        if next_head_position in snake.positions:
+        snake.update_direction()
+        snake.move()
+
+        if snake.get_head_position() in snake.positions[1:]:
+            apple.randomize_position(snake.positions)
+            screen.fill(BOARD_BACKGROUND_COLOR)
             snake.reset()
-        else:
-            snake.positions.insert(0, next_head_position)
-            if apple.position == next_head_position:
-                snake.length += 1
-                apple.randomize_position(snake.positions)
-                snake.last = None
-            else:
-                snake.last = snake.positions[-1]
-                snake.positions.pop()
+
+        elif snake.get_head_position() == apple.position:
+            apple.randomize_position(snake.positions)
+            snake.length += 1
 
         apple.draw()
         snake.draw()
