@@ -28,7 +28,6 @@ SPEED = 20
 
 # Цвета используемые в игре:
 BOARD_BACKGROUND_COLOR = (0, 0, 0)
-BORDER_COLOR = (93, 216, 228)
 APPLE_COLOR = (255, 0, 0)
 SNAKE_COLOR = (0, 255, 0)
 
@@ -44,11 +43,12 @@ class GameObject():
         self.position = CENTRAL
         self.body_color = color
 
-    def create_rect(self, position: tuple = CENTRAL):
+    def create_rect(self, color, position: tuple = CENTRAL):
         """Создание прямоугольника для дальнейшей отрисовки."""
-        return pg.Rect(position,
-                       (GRID_SIZE,
-                        GRID_SIZE))
+        # return pg.Rect(position, (GRID_SIZE, GRID_SIZE))
+        rect = pg.Rect(position, (GRID_SIZE, GRID_SIZE))
+        pg.draw.rect(screen, color, rect)
+        pg.draw.rect(screen, BOARD_BACKGROUND_COLOR, rect, 1)
 
     def draw(self):
         """Метод для будущих классов"""
@@ -73,8 +73,7 @@ class Apple(GameObject):
 
     def draw(self):
         """Функция отрисовки."""
-        pg.draw.rect(screen, self.body_color,
-                     self.create_rect(self.position))
+        self.create_rect(self.body_color, self.position)
 
 
 class Snake(GameObject):
@@ -109,13 +108,11 @@ class Snake(GameObject):
     def draw(self):
         """Функция отрисовки."""
         # Отрисовка головы змейки
-        pg.draw.rect(screen, self.body_color,
-                     self.create_rect(self.get_head_position()))
+        self.create_rect(self.body_color, self.get_head_position())
 
         # Затирание последнего сегмента
         if self.last:
-            pg.draw.rect(screen, BOARD_BACKGROUND_COLOR,
-                         self.create_rect(self.last))
+            self.create_rect(BOARD_BACKGROUND_COLOR, self.last)
 
     def reset(self):
         """Сброс игры до стартовых значений."""
